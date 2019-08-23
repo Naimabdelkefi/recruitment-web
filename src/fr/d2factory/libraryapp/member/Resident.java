@@ -2,47 +2,31 @@ package fr.d2factory.libraryapp.member;
 
 import fr.d2factory.libraryapp.library.NotEnoughMoneyException;
 
-public class Student extends Member {
+public class Resident extends Member {
 	private static final int priceBeforeLate=10;
-	private static final int priceAfterLate=15;
-	private static final int daysBeforeLate=30;
-	private static final int freeFirstYear=15;
-	
-	private boolean firstYear;
-	public Student(float wallet, boolean firstyear) {
+	private static final int priceAfterLate=20;
+	private static final int daysBeforeLate=60;
+
+
+	public Resident(float wallet) {
 		super(wallet);
-		this.firstYear=firstyear;
-	}
-
-	public boolean isFirstYear() {
-		return firstYear;
-	}
-
-	public void setFirstYear(boolean firstYear) {
-		this.firstYear = firstYear;
-	}
+			}
 
 	@Override
 	public void payBook(int numberOfDays) {
 		int bill;
-		
 		if (numberOfDays<=daysBeforeLate) {
 			bill=numberOfDays*priceBeforeLate;
 		}
-		else
-		{
+		else {
 			this.setLate(true);
 			bill=(numberOfDays-daysBeforeLate)*priceAfterLate+daysBeforeLate*priceAfterLate;
-		}
-		if (this.isFirstYear()) {
-			 bill -= ((numberOfDays > freeFirstYear) ? freeFirstYear : numberOfDays)*priceBeforeLate;
 		}
         if(this.getWallet() > bill) {
             this.setWallet(this.getWallet() - bill);
         } else {
             throw new NotEnoughMoneyException();
         }
-		
 	}
 
 }
