@@ -1,5 +1,9 @@
 package fr.d2factory.libraryapp.member;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import fr.d2factory.libraryapp.book.Book;
 import fr.d2factory.libraryapp.library.Library;
 
 /**
@@ -10,8 +14,10 @@ public abstract class Member {
     /**
      * An initial sum of money the member has
      */
+	protected  boolean late=false;
     private float wallet;
-
+    protected List<Book> brrowedBook = new ArrayList<>();
+    
     /**
      * The member should pay their books when they are returned to the library
      *
@@ -26,4 +32,23 @@ public abstract class Member {
     public void setWallet(float wallet) {
         this.wallet = wallet;
     }
+	public boolean is_Late() {
+		return late;
+	}
+
+	public void setLate(boolean is_late) {
+		this.late = is_late;
+	}
+
+
+	public List<Book> getBrrowedBook() {
+		return brrowedBook;
+	}
+
+	public void setBrrowedBook(List<Book> brrowedBook) {
+		this.brrowedBook = brrowedBook;
+	}
+	public Member(float wallet) {
+		this.wallet = wallet;
+	}
 }
