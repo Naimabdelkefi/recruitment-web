@@ -14,8 +14,15 @@ public abstract class Member {
     /**
      * An initial sum of money the member has
      */
-	protected  boolean late=false;
-    private float wallet;
+	protected int daysBeforeLate;
+    public int getDaysBeforeLate() {
+		return daysBeforeLate;
+	}
+
+	public void setDaysBeforeLate(int daysBeforeLate) {
+		this.daysBeforeLate = daysBeforeLate;
+	}
+	private float wallet;
     protected List<Book> brrowedBook = new ArrayList<>();
     
     /**
@@ -32,23 +39,15 @@ public abstract class Member {
     public void setWallet(float wallet) {
         this.wallet = wallet;
     }
-	public boolean is_Late() {
-		return late;
-	}
-
-	public void setLate(boolean is_late) {
-		this.late = is_late;
-	}
-
 
 	public List<Book> getBrrowedBook() {
 		return brrowedBook;
 	}
-
 	public void setBrrowedBook(List<Book> brrowedBook) {
 		this.brrowedBook = brrowedBook;
 	}
-	public Member(float wallet) {
+	public Member(float wallet, int daysBeforedelay) {
+		this.daysBeforeLate=daysBeforedelay;
 		this.wallet = wallet;
 	}
 }

@@ -9,17 +9,16 @@ public class Resident extends Member {
 
 
 	public Resident(float wallet) {
-		super(wallet);
+		super(wallet,daysBeforeLate);
 			}
 
 	@Override
-	public void payBook(int numberOfDays) {
+	public void payBook(int numberOfDays) throws NotEnoughMoneyException {
 		int bill;
 		if (numberOfDays<=daysBeforeLate) {
 			bill=numberOfDays*priceBeforeLate;
 		}
 		else {
-			this.setLate(true);
 			bill=(numberOfDays-daysBeforeLate)*priceAfterLate+daysBeforeLate*priceAfterLate;
 		}
         if(this.getWallet() > bill) {

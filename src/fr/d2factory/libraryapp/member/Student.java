@@ -3,14 +3,15 @@ package fr.d2factory.libraryapp.member;
 import fr.d2factory.libraryapp.library.NotEnoughMoneyException;
 
 public class Student extends Member {
+	private static final int daysBeforeLate=60;
 	private static final int priceBeforeLate=10;
 	private static final int priceAfterLate=15;
-	private static final int daysBeforeLate=30;
 	private static final int freeFirstYear=15;
 	
 	private boolean firstYear;
+
 	public Student(float wallet, boolean firstyear) {
-		super(wallet);
+		super(wallet,daysBeforeLate);
 		this.firstYear=firstyear;
 	}
 
@@ -23,7 +24,7 @@ public class Student extends Member {
 	}
 
 	@Override
-	public void payBook(int numberOfDays) {
+	public void payBook(int numberOfDays) throws NotEnoughMoneyException {
 		int bill;
 		
 		if (numberOfDays<=daysBeforeLate) {
@@ -31,7 +32,6 @@ public class Student extends Member {
 		}
 		else
 		{
-			this.setLate(true);
 			bill=(numberOfDays-daysBeforeLate)*priceAfterLate+daysBeforeLate*priceAfterLate;
 		}
 		if (this.isFirstYear()) {
