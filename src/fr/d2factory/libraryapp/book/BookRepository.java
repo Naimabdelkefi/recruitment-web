@@ -1,4 +1,4 @@
-package fr.d2factory.libraryapp.book;
+package d2factory.libraryapp.book;
 
 import java.time.LocalDate;
 import java.util.HashMap;

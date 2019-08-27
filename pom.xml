@@ -1,21 +1,29 @@
 <project>
-    <artifactId>townsville-library</artifactId>
-    <groupId>fr.d2factory</groupId>
-    <modelVersion>4.0.0</modelVersion>
-    <name>Townsville Library</name>
-    <version>1.0.0</version>
+	<artifactId>townsville-library</artifactId>
+	<groupId>fr.d2factory</groupId>
+	<modelVersion>4.0.0</modelVersion>
+	<name>Townsville Library</name>
+	<version>1.0.0</version>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+	</dependencies>
 </project>

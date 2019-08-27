@@ -1,11 +1,11 @@
-package fr.d2factory.libraryapp.library;
+package d2factory.libraryapp.library;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-import fr.d2factory.libraryapp.book.Book;
-import fr.d2factory.libraryapp.book.BookRepository;
-import fr.d2factory.libraryapp.member.Member;
+import d2factory.libraryapp.book.Book;
+import d2factory.libraryapp.book.BookRepository;
+import d2factory.libraryapp.member.Member;
 
 public class LibraryImpl implements Library {
 	private BookRepository bookRepository;
@@ -15,18 +15,19 @@ public class LibraryImpl implements Library {
 
 	@Override
 	public Book borrowBook(long isbnCode, Member member, LocalDate borrowedAt) throws HasLateBooksException, NoSuchBookException {
+		Book borrowedBook = bookRepository.findBook(isbnCode);
+		System.out.println(borrowedBook.getAuthor());
+		if (borrowedBook==null) {
+			throw new NoSuchBookException();
+		}
 		for (Book book : member.getBrrowedBook()) {
-			long daysBetween = ChronoUnit.DAYS.between(borrowedAt, LocalDate.now());
-			//LocalDate borrowDate= bookRepository.findBorrowedBookDate(book);
+			
+			LocalDate borrowDate= bookRepository.findBorrowedBookDate(book);
+			long daysBetween = ChronoUnit.DAYS.between(borrowDate, LocalDate.now());
 			if (daysBetween>member.getDaysBeforeLate()) {
 			 throw new HasLateBooksException();	
 			}
 		}
-		Book borrowedBook = bookRepository.findBook(isbnCode);
-		if (borrowedBook==null) {
-			throw new NoSuchBookException();
-		}
-		
 		bookRepository.saveBookBorrow(borrowedBook, borrowedAt);
 		member.getBrrowedBook().add(borrowedBook);
 		return borrowedBook;

@@ -1,6 +1,6 @@
-package fr.d2factory.libraryapp.member;
+package d2factory.libraryapp.member;
 
-import fr.d2factory.libraryapp.library.NotEnoughMoneyException;
+import d2factory.libraryapp.library.NotEnoughMoneyException;
 
 public class Student extends Member {
 	private static final int daysBeforeLate=60;

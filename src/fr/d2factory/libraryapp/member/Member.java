@@ -1,10 +1,10 @@
-package fr.d2factory.libraryapp.member;
+package d2factory.libraryapp.member;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.d2factory.libraryapp.book.Book;
-import fr.d2factory.libraryapp.library.Library;
+import d2factory.libraryapp.library.Library;
+import d2factory.libraryapp.book.Book;
 
 /**
  * A member is a person who can borrow and return books to a {@link Library}
