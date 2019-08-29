@@ -21,7 +21,6 @@ public class LibraryImpl implements Library {
 			throw new NoSuchBookException();
 		}
 		for (Book book : member.getBrrowedBook()) {
-			
 			LocalDate borrowDate= bookRepository.findBorrowedBookDate(book);
 			long daysBetween = ChronoUnit.DAYS.between(borrowDate, LocalDate.now());
 			if (daysBetween>member.getDaysBeforeLate()) {
@@ -38,8 +37,6 @@ public class LibraryImpl implements Library {
 		LocalDate borrowDate= bookRepository.findBorrowedBookDate(book);
 		int daysBetween = (int) ChronoUnit.DAYS.between(borrowDate, LocalDate.now());
 		member.payBook(daysBetween);
-		
-
 	}
 
 }

@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class BookRepository {
     private Map<ISBN, Book> availableBooks = new HashMap<>();
-    private Map<Book, LocalDate> borrowedBooks = new HashMap<>();
+    private Map<ISBN, LocalDate> borrowedBooks = new HashMap<>();
 
     public void addBooks(List<Book> books){
     	for (Book book : books)
@@ -28,7 +28,7 @@ public class BookRepository {
     public void saveBookBorrow(Book book, LocalDate borrowedAt){
     	
     	availableBooks.remove(book.getIsbn());
-        borrowedBooks.put(book, borrowedAt);
+        borrowedBooks.put(book.getIsbn(), borrowedAt);
     }
 
     public LocalDate findBorrowedBookDate(Book book) {
