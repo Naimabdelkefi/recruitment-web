@@ -19,128 +19,188 @@ import org.json.simple.parser.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.Assert.assertTrue;
+
 import static org.junit.Assert.fail;
 
 public class LibraryTest {
-    private Library library ;
+    private Library library;
     private BookRepository bookRepository;
     private List<Book> bookList;
 
-    @Before
-    public void setup(){
-        bookRepository = new BookRepository();
-
-        library = new LibraryImpl(bookRepository);
+    private Collection<Book> deserialize() {
         JSONParser jsonParser = new JSONParser();
-
-        try
-        {
+        try {
             Object obj = jsonParser.parse((new FileReader("src\\test\\resources\\books.json")));
             JSONArray bookList = (JSONArray) obj;
             List<Book> books = new ArrayList<>();
-            for (Object b : bookList) {
-                JSONObject book = (JSONObject) b;
+            for (Object bookObject : bookList) {
+                JSONObject book = (JSONObject) bookObject;
                 String Title = (String) book.get("title");
                 String Author = (String) book.get("author");
                 long Isbn = (long) ((JSONObject) book.get("isbn")).get("isbnCode");
                 books.add(new Book(Title, Author, new ISBN(Isbn)));
             }
-            this.bookList = Collections.unmodifiableList(books);
-        }
-        catch (FileNotFoundException e){
+            return Collections.unmodifiableList(books);
+        } catch (FileNotFoundException e) {
             fail("file not found");
-        }
-        catch (IOException |  ParseException  e) {
+        } catch (IOException | ParseException e) {
             fail("error while parsing the file");
         }
-        bookRepository.addBooks(bookList);
+        return null;
     }
 
-    @Test
-    public void member_can_borrow_a_book_if_book_is_available(){
-   fail("Implement me");
+    @Before
+    public void setup() {
+        if (bookList == null) {
+            bookList = (List<Book>) deserialize();
+        }
+
+        bookRepository = new BookRepository();
+        bookRepository.addBooks(bookList);
+        library = new LibraryImpl(bookRepository);
+
+    }
+
+    @Test(expected = Test.None.class)
+    public void memberCanBorrowABookIfBookIsAvailable() {
+        Member resident = new Resident(0);
+        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), resident, LocalDate.now());
+
+        Member student = new Resident(0);
+        library.borrowBook(bookList.get(1).getIsbn().getIsbnCode(), student, LocalDate.now());
     }
 
     @Test(expected = NoSuchBookException.class)
-    public void borrowed_book_is_no_longer_available(){
-    	Member m1 = new Student(1000,true);
-    	 Member m2 = new Student(1000,false);
-    	 library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(),m1,LocalDate.now().minusDays(10));
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m2, LocalDate.now());
-
+    public void borrowedBookIsNoLongerAvailable() {
+        int wallet = 100;
+        int days = 10;
+        Book book = bookList.get(0);
+        Member student1 = new Student(wallet, true);
+        Member student2 = new Student(wallet, false);
+        library.borrowBook(book.getIsbn().getIsbnCode(), student1, LocalDate.now().minusDays(days));
+        library.borrowBook(book.getIsbn().getIsbnCode(), student2, LocalDate.now());
     }
 
     @Test
-    public void residents_are_taxed_10cents_for_each_day_they_keep_a_book(){
-        Member m1 = new Resident(100);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(5));
-        library.returnBook(bookList.get(0), m1);
-        Assert.assertEquals( 50 , m1.getWallet(),0);
+    public void residentsAreTaxed10CentsForEachDayTheyKeepABookBeforeTheInitial60Days() {
+        int wallet = 100;
+        int days = 5;
+        Book book = bookList.get(0);
+        Member resident = new Resident(wallet);
+        library.borrowBook(book.getIsbn().getIsbnCode(), resident, LocalDate.now().minusDays(days));
+        library.returnBook(book, resident);
+        int prix = Resident.PRICE_BEFORE_LATE * days;
+        Assert.assertEquals(wallet - prix, resident.getWallet(), 0);
     }
 
     @Test
-    public void students_pay_10_cents_the_first_30days(){
-        Member m1 = new Student(300,true);
+    public void studentsPay10CentsTheFirst30Days() {
+        int wallet = 300;
+        int days = 30;
+        Member student1 = new Student(wallet, true);
+        Book book1 = bookList.get(0);
+        library.borrowBook(book1.getIsbn().getIsbnCode(), student1, LocalDate.now().minusDays(days));
+        library.returnBook(book1,student1);
+        int prix = (days-Student.FREE_FIRST_YEAR)* Student.PRICE_BEFORE_LATE;
+        Assert.assertEquals(wallet-prix, student1.getWallet(), 0);
 
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(30));
-        library.returnBook(bookList.get(0), m1);
-        Assert.assertEquals( 150, m1.getWallet(),0);
+        Member student2 = new Student(wallet, false);
+        Book book2 = bookList.get(1);
+        library.borrowBook(book2.getIsbn().getIsbnCode(), student2, LocalDate.now().minusDays(days));
+        library.returnBook(book2, student2);
+        prix = days* Student.PRICE_BEFORE_LATE;
+        Assert.assertEquals(wallet-prix, student2.getWallet(), 0);
     }
 
     @Test
-    public void students_in_1st_year_are_not_taxed_for_the_first_15days(){
-        Member m1 = new Student(250,true);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(15));
-        library.returnBook(bookList.get(0), m1);
-        Assert.assertEquals( 250, m1.getWallet(),0);
+    public void studentsIn1StYearAreNotTaxedForTheFirst15Days() {
+        int wallet = 300;
+        Book book = bookList.get(0);
+        Member student = new Student(wallet, true);
+        library.borrowBook(book.getIsbn().getIsbnCode(), student, LocalDate.now().minusDays(15));
+        library.returnBook(book, student);
+        Assert.assertEquals(wallet, student.getWallet(), 0);
     }
 
     @Test
-    public void students_noFirstYear_pay_15cents_for_each_day_they_keep_a_book_after_the_initial_30days(){
-        Member m1 = new Student(1000,false);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(35));
-        library.returnBook(bookList.get(0), m1);
-        int prix =((30)*10)+((35 - 30)*15);
-        Assert.assertEquals( 1000 - prix, m1.getWallet(), 0);
-    }
-    @Test
-    public void students_pay_15cents_for_each_day_they_keep_a_book_after_the_initial_30days(){
-        Member m1 = new Student(1000,true);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(45));
-        library.returnBook(bookList.get(0), m1);
-        int prix =((30-15)*10)+((45 - 30)*15);
-        Assert.assertEquals( 1000 - prix, m1.getWallet(), 0);
+    public void studentsNotIn1StYearAreTaxedAfterTheInitial30Days() {
+        int wallet=1000;
+        int days=35;
+        Member student = new Student(wallet, false);
+        Book book = bookList.get(0);
+        library.borrowBook(book.getIsbn().getIsbnCode(), student, LocalDate.now().minusDays(days));
+        library.returnBook(book, student);
+        int prix = ((Student.DAYS_BEFORE_LATE) * Student.PRICE_BEFORE_LATE) + ((days- Student.DAYS_BEFORE_LATE) * Student.PRICE_AFTER_LATE);
+        Assert.assertEquals(wallet - prix, student.getWallet(), 0);
     }
 
     @Test
-    public void residents_pay_20cents_for_each_day_they_keep_a_book_after_the_initial_60days(){
-        Member m1 = new Resident(1000);
+    public void studentsTaxedForEachDayTheyKeepABookAfterTheInitial30Days() {
+        Book book = bookList.get(0);
+        int wallet=1000;
+        int days=45;
+        Member student = new Student(1000, true);
+        library.borrowBook(book.getIsbn().getIsbnCode(), student, LocalDate.now().minusDays(days));
+        library.returnBook(book, student);
+        int prix = ((Student.DAYS_BEFORE_LATE - Student.FREE_FIRST_YEAR) * Student.PRICE_BEFORE_LATE) + ((days - Student.DAYS_BEFORE_LATE) * Student.PRICE_AFTER_LATE);
+        Assert.assertEquals(wallet - prix, student.getWallet(), 0);
+    }
 
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(72));
-        library.returnBook(bookList.get(0), m1);
-
-        int prix = (60*10) + ((72 - 60)*20);
-        Assert.assertEquals( 1000 - prix, m1.getWallet(),0);
+    @Test
+    public void residentsTaxedForEachDayTheyKeepABookAfterTheInitial60Days() {
+        Book book = bookList.get(0);
+        int wallet=1000;
+        int days=72;
+        Member resident = new Resident(wallet);
+        library.borrowBook(book.getIsbn().getIsbnCode(), resident, LocalDate.now().minusDays(days));
+        library.returnBook(book, resident);
+        int prix = (Resident.DAYS_BEFORE_LATE* Resident.PRICE_BEFORE_LATE) + ((days - Resident.DAYS_BEFORE_LATE) * Resident.PRICE_AFTER_LATE);
+        Assert.assertEquals(wallet- prix, resident.getWallet(), 0);
     }
 
     @Test(expected = HasLateBooksException.class)
-    public void members_cannot_borrow_book_if_they_have_late_books(){
-        Member m1 = new Resident(2000);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(70));
-        library.borrowBook(bookList.get(1).getIsbn().getIsbnCode(), m1, LocalDate.now());
+    public void residentCannotBorrowBookIfTheyHaveLateBooks() {
+        int wallet=2000;
+        int days=70;
+        Member resident = new Resident(wallet);
+        Book book1 = bookList.get(0);
+        Book book2 = bookList.get(1);
+        library.borrowBook(book2.getIsbn().getIsbnCode(), resident, LocalDate.now().minusDays(days));
+        library.borrowBook(book1.getIsbn().getIsbnCode(), resident, LocalDate.now());
     }
+
+    @Test(expected = HasLateBooksException.class)
+    public void studentCannotBorrowBookIfTheyHaveLateBooks() {
+        int wallet=2000;
+        int days=70;
+        Member student = new Student(wallet,true);
+        Book book1 = bookList.get(0);
+        Book book2 = bookList.get(1);
+        library.borrowBook(book1.getIsbn().getIsbnCode(), student, LocalDate.now().minusDays(days));
+        library.borrowBook(book2.getIsbn().getIsbnCode(), student, LocalDate.now());
+    }
+
+
     @Test(expected = NotEnoughMoneyException.class)
-    public void members_cannot_borrow_book_if_they_dont_have_enough_money(){
-        Member m1 = new Resident(100);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(10));
-        library.returnBook(bookList.get(0), m1);
+    public void residentCannotBorrowBookIfTheyDontHaveEnoughMoney() {
+        int wallet=0;
+        int days=10;
+        Book book=bookList.get(0);
+        Member resident = new Resident(wallet);
+        library.borrowBook(book.getIsbn().getIsbnCode(), resident, LocalDate.now().minusDays(days));
+        library.returnBook(book, resident);
+    }
+
+    @Test(expected = NotEnoughMoneyException.class)
+    public void studentCannotBorrowBookIfTheyDontHaveEnoughMoney() {
+        int wallet=0;
+        int days=16;
+        Book book=bookList.get(0);
+        Member student = new Student(wallet,true);
+        library.borrowBook(book.getIsbn().getIsbnCode(), student, LocalDate.now().minusDays(days));
+        library.returnBook(book, student);
     }
 }

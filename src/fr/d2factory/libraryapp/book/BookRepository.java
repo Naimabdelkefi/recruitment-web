@@ -10,13 +10,13 @@ import java.util.Map;
  */
 public class BookRepository {
     private Map<ISBN, Book> availableBooks = new HashMap<>();
-    private Map<ISBN, LocalDate> borrowedBooks = new HashMap<>();
+    private Map<Book, LocalDate> borrowedBooks = new HashMap<>();
 
     public Map<ISBN, Book> getAvailableBooks() {
         return availableBooks;
     }
 
-    public Map<ISBN, LocalDate> getBorrowedBooks() {
+    public Map<Book, LocalDate> getBorrowedBooks() {
         return borrowedBooks;
     }
 
@@ -29,18 +29,16 @@ public class BookRepository {
     }
 
     public Book findBook(long isbnCode) {
-    	ISBN isbn=new ISBN(isbnCode);
-        Book b=availableBooks.get(isbn);
-        return b;
+        ISBN isbn=new ISBN(isbnCode);
+        return availableBooks.get(isbn);
     }
 
     public void saveBookBorrow(Book book, LocalDate borrowedAt){
-    	
     	availableBooks.remove(book.getIsbn());
-        borrowedBooks.put(book.getIsbn(), borrowedAt);
+        borrowedBooks.put(book, borrowedAt);
     }
 
     public LocalDate findBorrowedBookDate(Book book) {
-        return borrowedBooks.get(book.getIsbn());
+        return borrowedBooks.get(book);
     }
 }

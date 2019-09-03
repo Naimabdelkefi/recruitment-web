@@ -3,15 +3,15 @@ package d2factory.libraryapp.member;
 import d2factory.libraryapp.library.NotEnoughMoneyException;
 
 public class Student extends Member {
-	private static final int daysBeforeLate=30;
-	private static final int priceBeforeLate=10;
-	private static final int priceAfterLate=15;
-	private static final int freeFirstYear=15;
+	public static final int DAYS_BEFORE_LATE =30;
+	public static final int PRICE_BEFORE_LATE =10;
+	public static final int PRICE_AFTER_LATE =15;
+	public static final int FREE_FIRST_YEAR =15;
 	
 	private boolean firstYear;
 
 	public Student(float wallet, boolean firstyear) {
-		super(wallet,daysBeforeLate);
+		super(wallet, DAYS_BEFORE_LATE);
 		this.firstYear=firstyear;
 	}
 
@@ -27,22 +27,21 @@ public class Student extends Member {
 	public void payBook(int numberOfDays) throws NotEnoughMoneyException {
 		int bill;
 		
-		if (numberOfDays<=daysBeforeLate) {
-			bill=numberOfDays*priceBeforeLate;
+		if (numberOfDays<= DAYS_BEFORE_LATE) {
+			bill=numberOfDays* PRICE_BEFORE_LATE;
 		}
 		else
 		{
-			bill=((numberOfDays-daysBeforeLate)*priceAfterLate)+daysBeforeLate*priceBeforeLate;
+			bill=((numberOfDays- DAYS_BEFORE_LATE)* PRICE_AFTER_LATE)+ DAYS_BEFORE_LATE * PRICE_BEFORE_LATE;
 		}
 		if (this.isFirstYear()) {
-			 bill -= ((numberOfDays > freeFirstYear) ? freeFirstYear : numberOfDays)*priceBeforeLate;
+			 bill -= ((numberOfDays > FREE_FIRST_YEAR) ? FREE_FIRST_YEAR : numberOfDays)* PRICE_BEFORE_LATE;
 		}
-        if(this.getWallet() > bill) {
+        if(this.getWallet() >= bill) {
             this.setWallet(this.getWallet() - bill);
         } else {
             throw new NotEnoughMoneyException();
         }
-		
 	}
 
 }
