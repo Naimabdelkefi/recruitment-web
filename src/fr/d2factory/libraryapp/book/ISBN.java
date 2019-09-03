@@ -5,9 +5,19 @@ public class ISBN {
         return isbnCode;
     }
 
-    long isbnCode;
+    private long isbnCode;
 
     public ISBN(long isbnCode) {
         this.isbnCode = isbnCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.hashCode() == this.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(isbnCode);
     }
 }

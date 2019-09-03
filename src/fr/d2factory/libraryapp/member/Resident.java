@@ -19,7 +19,7 @@ public class Resident extends Member {
 			bill=numberOfDays*priceBeforeLate;
 		}
 		else {
-			bill=(numberOfDays-daysBeforeLate)*priceAfterLate+daysBeforeLate*priceAfterLate;
+			bill=((numberOfDays-daysBeforeLate)*priceAfterLate)+daysBeforeLate*priceBeforeLate;
 		}
         if(this.getWallet() > bill) {
             this.setWallet(this.getWallet() - bill);

@@ -4,9 +4,9 @@ package d2factory.libraryapp.book;
  * A simple representation of a book
  */
 public class Book {
-    String title;
-    String author;
-    ISBN isbn;
+    private String title;
+    private String author;
+    private ISBN isbn;
 
     public String getTitle() {
 		return title;
@@ -37,4 +37,13 @@ public class Book {
         this.author = author;
         this.isbn = isbn;
     }
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj.hashCode() == this.hashCode();
+	}
+	@Override
+	public int hashCode() {
+		return isbn.hashCode();
+	}
 }

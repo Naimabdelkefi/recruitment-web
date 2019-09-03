@@ -3,10 +3,7 @@ package d2factory.libraryapp;
 import d2factory.libraryapp.book.Book;
 import d2factory.libraryapp.book.BookRepository;
 import d2factory.libraryapp.book.ISBN;
-import d2factory.libraryapp.library.HasLateBooksException;
-import d2factory.libraryapp.library.Library;
-import d2factory.libraryapp.library.LibraryImpl;
-import d2factory.libraryapp.library.NoSuchBookException;
+import d2factory.libraryapp.library.*;
 import d2factory.libraryapp.member.Member;
 import d2factory.libraryapp.member.Resident;
 import d2factory.libraryapp.member.Student;
@@ -22,11 +19,14 @@ import org.json.simple.parser.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class LibraryTest {
@@ -54,8 +54,6 @@ public class LibraryTest {
                 books.add(new Book(Title, Author, new ISBN(Isbn)));
             }
             this.bookList = Collections.unmodifiableList(books);
-
-           // bookList.addAll(books);
         }
         catch (FileNotFoundException e){
             fail("file not found");
@@ -68,16 +66,16 @@ public class LibraryTest {
 
     @Test
     public void member_can_borrow_a_book_if_book_is_available(){
-        fail("Implement me");
+   fail("Implement me");
     }
 
-    @Test
+    @Test(expected = NoSuchBookException.class)
     public void borrowed_book_is_no_longer_available(){
-    	 Member m1 = new Student(1000,true);
+    	Member m1 = new Student(1000,true);
     	 Member m2 = new Student(1000,false);
-        System.out.println(bookList.get(0).getIsbn().getIsbnCode());
     	 library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(),m1,LocalDate.now().minusDays(10));
         library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m2, LocalDate.now());
+
     }
 
     @Test
@@ -99,30 +97,38 @@ public class LibraryTest {
 
     @Test
     public void students_in_1st_year_are_not_taxed_for_the_first_15days(){
-        Member m1 = new Student(1000,true);
+        Member m1 = new Student(250,true);
         library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(15));
         library.returnBook(bookList.get(0), m1);
-        Assert.assertEquals( 1000 , m1.getWallet(),0);
+        Assert.assertEquals( 250, m1.getWallet(),0);
     }
 
     @Test
+    public void students_noFirstYear_pay_15cents_for_each_day_they_keep_a_book_after_the_initial_30days(){
+        Member m1 = new Student(1000,false);
+        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(35));
+        library.returnBook(bookList.get(0), m1);
+        int prix =((30)*10)+((35 - 30)*15);
+        Assert.assertEquals( 1000 - prix, m1.getWallet(), 0);
+    }
+    @Test
     public void students_pay_15cents_for_each_day_they_keep_a_book_after_the_initial_30days(){
         Member m1 = new Student(1000,true);
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(40));
+        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(45));
         library.returnBook(bookList.get(0), m1);
-        int prix =((30-15)*10)+((40 - 30)*15);
+        int prix =((30-15)*10)+((45 - 30)*15);
         Assert.assertEquals( 1000 - prix, m1.getWallet(), 0);
     }
 
     @Test
     public void residents_pay_20cents_for_each_day_they_keep_a_book_after_the_initial_60days(){
-        Member m1 = new Resident(2000);
+        Member m1 = new Resident(1000);
 
-        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(70));
+        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(72));
         library.returnBook(bookList.get(0), m1);
 
-        int prix = (60*10) + ((70 - 60)*20);
-        Assert.assertEquals( 2000 - prix, m1.getWallet(),0);
+        int prix = (60*10) + ((72 - 60)*20);
+        Assert.assertEquals( 1000 - prix, m1.getWallet(),0);
     }
 
     @Test(expected = HasLateBooksException.class)
@@ -130,5 +136,11 @@ public class LibraryTest {
         Member m1 = new Resident(2000);
         library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(70));
         library.borrowBook(bookList.get(1).getIsbn().getIsbnCode(), m1, LocalDate.now());
+    }
+    @Test(expected = NotEnoughMoneyException.class)
+    public void members_cannot_borrow_book_if_they_dont_have_enough_money(){
+        Member m1 = new Resident(100);
+        library.borrowBook(bookList.get(0).getIsbn().getIsbnCode(), m1, LocalDate.now().minusDays(10));
+        library.returnBook(bookList.get(0), m1);
     }
 }

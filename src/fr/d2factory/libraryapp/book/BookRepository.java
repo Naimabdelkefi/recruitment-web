@@ -12,6 +12,14 @@ public class BookRepository {
     private Map<ISBN, Book> availableBooks = new HashMap<>();
     private Map<ISBN, LocalDate> borrowedBooks = new HashMap<>();
 
+    public Map<ISBN, Book> getAvailableBooks() {
+        return availableBooks;
+    }
+
+    public Map<ISBN, LocalDate> getBorrowedBooks() {
+        return borrowedBooks;
+    }
+
     public void addBooks(List<Book> books){
     	for (Book book : books)
     	{
@@ -22,7 +30,8 @@ public class BookRepository {
 
     public Book findBook(long isbnCode) {
     	ISBN isbn=new ISBN(isbnCode);
-        return availableBooks.get(isbn);
+        Book b=availableBooks.get(isbn);
+        return b;
     }
 
     public void saveBookBorrow(Book book, LocalDate borrowedAt){
@@ -32,6 +41,6 @@ public class BookRepository {
     }
 
     public LocalDate findBorrowedBookDate(Book book) {
-        return borrowedBooks.get(book);
+        return borrowedBooks.get(book.getIsbn());
     }
 }

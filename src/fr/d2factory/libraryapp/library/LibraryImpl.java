@@ -16,7 +16,6 @@ public class LibraryImpl implements Library {
 	@Override
 	public Book borrowBook(long isbnCode, Member member, LocalDate borrowedAt) throws HasLateBooksException, NoSuchBookException {
 		Book borrowedBook = bookRepository.findBook(isbnCode);
-		System.out.println(borrowedBook.getAuthor());
 		if (borrowedBook==null) {
 			throw new NoSuchBookException();
 		}

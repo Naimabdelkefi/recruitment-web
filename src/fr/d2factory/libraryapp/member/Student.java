@@ -3,7 +3,7 @@ package d2factory.libraryapp.member;
 import d2factory.libraryapp.library.NotEnoughMoneyException;
 
 public class Student extends Member {
-	private static final int daysBeforeLate=60;
+	private static final int daysBeforeLate=30;
 	private static final int priceBeforeLate=10;
 	private static final int priceAfterLate=15;
 	private static final int freeFirstYear=15;
@@ -32,7 +32,7 @@ public class Student extends Member {
 		}
 		else
 		{
-			bill=(numberOfDays-daysBeforeLate)*priceAfterLate+daysBeforeLate*priceAfterLate;
+			bill=((numberOfDays-daysBeforeLate)*priceAfterLate)+daysBeforeLate*priceBeforeLate;
 		}
 		if (this.isFirstYear()) {
 			 bill -= ((numberOfDays > freeFirstYear) ? freeFirstYear : numberOfDays)*priceBeforeLate;
